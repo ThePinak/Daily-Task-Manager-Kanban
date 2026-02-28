@@ -172,4 +172,4 @@ All endpoints require the `x-anonymous-user-id` header.
 
 ## 📜 License
 
-MIT License — feel free to use, modify, and distribute.
+MIT License — feel free to use and distribute.
