@@ -165,19 +165,6 @@ Visit `http://localhost:5173` — the board loads immediately, no login required
 
 ---
 
-## 📸 Screenshots
-
-> *Add screenshots here of the running application*
->
-> Suggested screenshots:
-> 1. Empty board with "Add Task" button
-> 2. Board with tasks in all four columns
-> 3. Task being dragged between columns
-> 4. Timer running on an Ongoing task
-> 5. Completed tasks with strikethrough
-
----
-
 ## 🧠 API Reference
 
 | Method | Endpoint | Description |
@@ -191,37 +178,6 @@ Visit `http://localhost:5173` — the board loads immediately, no login required
 | `DELETE` | `/api/tasks/:id` | Delete a task |
 
 All endpoints require the `x-anonymous-user-id` header.
-
----
-
-## 🔮 Future Improvements
-
-- [ ] Dark/Light mode toggle
-- [ ] Task editing modal
-- [ ] Task deletion from the UI
-- [ ] Previous day history view
-- [ ] Daily productivity analytics & charts
-- [ ] Subtasks / checklists within tasks
-- [ ] Keyboard shortcuts
-- [ ] PWA support for offline use
-
----
-
-## 🛠 Technical Highlights
-
-**For interviews and resume discussions:**
-
-1. **Zero-Auth Architecture** — Users are identified by a UUID stored in `localStorage`, sent via Axios interceptor on every request. No signup friction, instant usability.
-
-2. **Optimistic UI with Rollback** — Drag-and-drop updates the UI instantly before the API call. On failure, the entire task state rolls back to a pre-operation snapshot.
-
-3. **Position-Based Ordering** — Each task has a `position` field. On drag-and-drop, the backend uses `$inc` to shift positions atomically, preventing collisions without locking.
-
-4. **Timer Architecture** — The `useTimer` hook runs a `setInterval` locally, auto-saves to the backend every 30 seconds, and persists unsaved time on unmount. The backend stores `lastTimerStart` for crash recovery.
-
-5. **Single-Collection Design** — One MongoDB collection with a compound index `{ userId, taskDate, status, position }` handles all queries efficiently. Daily scoping via `taskDate` keeps the data clean.
-
-6. **Touch-Friendly DnD** — Uses `@dnd-kit` with separate `PointerSensor` (5px activation distance) and `TouchSensor` (200ms delay) to distinguish taps from drags on mobile devices.
 
 ---
 
