@@ -1,0 +1,62 @@
+/* ─── Global Styles — Daily Task Management Board ──────── */
+
+@import "tailwindcss";
+
+/* ─── Custom Theme ─────────────────────────────────────── */
+
+@theme {
+  /* Brand colors */
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  /* Surface colors (dark theme) */
+  --color-surface-900: #0f172a;
+  --color-surface-800: #1e293b;
+  --color-surface-700: #334155;
+  --color-surface-600: #475569;
+
+  /* Status column colors */
+  --color-todo: #f59e0b;
+  --color-pending: #a78bfa;
+  --color-ongoing: #38bdf8;
+  --color-completed: #34d399;
+
+  /* Priority colors */
+  --color-priority-low: #34d399;
+  --color-priority-medium: #fbbf24;
+  --color-priority-high: #fb7185;
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Base Styles ──────────────────────────────────────── */
+
+body {
+  @apply bg-surface-900 text-gray-100 font-sans antialiased;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b;
+}

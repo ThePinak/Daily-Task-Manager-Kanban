@@ -1,0 +1,255 @@
+# Daily Task Management Board — System Architecture
+
+## 1. High-Level Architecture
+
+```mermaid
+graph LR
+    subgraph Client["Frontend (React SPA)"]
+        UI["React UI + DnD"]
+        LS["localStorage\n(anonymousUserId)"]
+    end
+
+    subgraph Server["Backend (Node.js + Express)"]
+        API["REST API"]
+    end
+
+    subgraph DB["Database (MongoDB)"]
+        Tasks["tasks collection"]
+    end
+
+    UI -- "HTTP requests\n(userId in header)" --> API
+    API -- "Mongoose queries" --> Tasks
+    Tasks -- "Documents" --> API
+    API -- "JSON responses" --> UI
+    UI -- "Read/Write userId" --> LS
+```
+
+### How the layers connect
+
+| Layer | Technology | Role |
+|---|---|---|
+| **Frontend** | React (Vite) | Renders the four-column board, handles drag-and-drop, tracks time locally, sends API calls |
+| **Backend** | Node.js + Express | Exposes REST endpoints for CRUD and status updates, validates data, talks to MongoDB |
+| **Database** | MongoDB (Mongoose ODM) | Persists tasks, their statuses, order positions, and accumulated time-tracking data per anonymous user |
+
+> There is no auth layer. The `anonymousUserId` (a UUID generated once in the browser) is sent as a custom header (`x-user-id`) with every request. The backend uses it to scope all queries.
+
+---
+
+## 2. Frontend Responsibilities (React)
+
+| Responsibility | Details |
+|---|---|
+| **Anonymous identity** | On first visit, generate a UUID v4 and store it in `localStorage`. Send it as `x-user-id` header on every API call. |
+| **Board rendering** | Display four fixed columns: *Todo*, *Pending*, *Ongoing*, *Completed*. Each column renders its task cards. |
+| **Drag-and-drop** | Use a library (e.g., `@hello-pangea/dnd`) to allow dragging task cards between columns and reordering within a column. |
+| **Task CRUD** | Provide UI to create new tasks (title, optional description), edit task details, and delete tasks. |
+| **Time tracking** | When a task enters **Ongoing**, start a local interval timer. Display elapsed time on the card. When the task leaves Ongoing (dragged to another column), stop the timer and persist the accumulated duration via API. |
+| **Optimistic updates** | Update the UI immediately on drag-drop, then confirm with the backend. Roll back if the API call fails. |
+| **Responsiveness** | Adapt layout for desktop (4 columns side-by-side) and mobile (stacked/scrollable columns). |
+
+---
+
+## 3. Backend Responsibilities (Express)
+
+| Responsibility | Details |
+|---|---|
+| **User scoping** | Extract `x-user-id` from request headers. All database queries are filtered by this userId. If missing, return `400`. |
+| **REST API** | Expose endpoints for task lifecycle (see table below). |
+| **Validation** | Validate required fields (`title`, `status`), enforce allowed status values, sanitize inputs. |
+| **Order management** | Maintain a numeric `position` field per task per column so the frontend can preserve card order after drag-and-drop. |
+| **Time accumulation** | Accept time-tracking updates (duration in seconds) and add them to the task's `totalTimeSpent` field. |
+| **Error handling** | Return consistent error responses with appropriate HTTP status codes. |
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/tasks` | Fetch all tasks for the current user |
+| `POST` | `/api/tasks` | Create a new task (defaults to *Todo* status) |
+| `PUT` | `/api/tasks/:id` | Update task details (title, description) |
+| `PATCH` | `/api/tasks/:id/status` | Move task to a new status + update position |
+| `PATCH` | `/api/tasks/:id/time` | Add elapsed time to the task's total |
+| `PATCH` | `/api/tasks/reorder` | Batch-update positions after reordering within a column |
+| `DELETE` | `/api/tasks/:id` | Delete a task |
+
+---
+
+## 4. Database Responsibilities (MongoDB)
+
+### Task Document Schema
+
+```
+tasks collection
+├── _id           : ObjectId  (auto-generated)
+├── userId        : String    (the anonymousUserId from localStorage)
+├── title         : String    (required, max 100 chars)
+├── description   : String    (optional, max 500 chars)
+├── status        : String    (enum: "todo" | "pending" | "ongoing" | "completed")
+├── position      : Number    (order within the column, lower = higher on screen)
+├── totalTimeSpent: Number    (seconds accumulated while in Ongoing)
+├── createdAt     : Date      (auto, via timestamps)
+└── updatedAt     : Date      (auto, via timestamps)
+```
+
+### Indexes
+
+| Index | Purpose |
+|---|---|
+| `{ userId: 1, status: 1, position: 1 }` | Primary query pattern — fetch all tasks for a user grouped by status, sorted by position |
+| `{ userId: 1 }` | Fast lookup for all user tasks |
+
+### Why this schema works
+
+- **Flat structure** — One collection, one document per task. No embedded arrays, no joins. Simple to query and update.
+- **Position field** — Enables stable ordering within each column without relying on insertion order.
+- **userId as a string** — No user collection needed; the UUID is just a grouping key.
+
+---
+
+## 5. Data Flow: UI → Backend → DB → UI
+
+### Creating a Task
+
+```mermaid
+sequenceDiagram
+    participant U as React UI
+    participant A as Express API
+    participant D as MongoDB
+
+    U->>U: User types title, clicks "Add Task"
+    U->>A: POST /api/tasks { title, description } + x-user-id header
+    A->>A: Validate input, set status="todo", calculate position
+    A->>D: Insert new task document
+    D-->>A: Return created document
+    A-->>U: 201 { task object }
+    U->>U: Add card to Todo column
+```
+
+### Loading the Board
+
+```mermaid
+sequenceDiagram
+    participant U as React UI
+    participant A as Express API
+    participant D as MongoDB
+
+    U->>U: App mounts, reads userId from localStorage
+    U->>A: GET /api/tasks + x-user-id header
+    A->>D: Find all tasks where userId matches, sort by position
+    D-->>A: Return array of task documents
+    A-->>U: 200 [ ...tasks ]
+    U->>U: Group tasks by status, render into four columns
+```
+
+---
+
+## 6. Drag-and-Drop Update Flow
+
+When a user drags a card from one column to another (e.g., *Todo* → *Ongoing*):
+
+```mermaid
+sequenceDiagram
+    participant U as React UI
+    participant A as Express API
+    participant D as MongoDB
+
+    U->>U: User drops card into Ongoing column at position 2
+    U->>U: Optimistic update — move card in local state immediately
+    Note over U: If target is Ongoing, start local timer
+    Note over U: If source was Ongoing, stop timer & prepare time patch
+
+    par Status Update
+        U->>A: PATCH /api/tasks/:id/status { status: "ongoing", position: 2 }
+        A->>D: Update task status and position
+        D-->>A: Confirm update
+        A-->>U: 200 OK
+    and Reorder Siblings
+        U->>A: PATCH /api/tasks/reorder { tasks: [{ id, position }, ...] }
+        A->>D: Bulk update positions for affected cards
+        D-->>A: Confirm
+        A-->>U: 200 OK
+    end
+
+    alt API Failure
+        U->>U: Roll back to previous state, show error toast
+    end
+```
+
+### Key points
+- The **UI updates first** (optimistic) so the board feels instant.
+- Two parallel requests handle the status change and the reordering of sibling cards.
+- On failure, the UI **rolls back** to the pre-drag state.
+
+---
+
+## 7. Time Tracking Data Flow
+
+### How time tracking works end-to-end
+
+```mermaid
+sequenceDiagram
+    participant U as React UI
+    participant A as Express API
+    participant D as MongoDB
+
+    U->>U: Card dragged INTO Ongoing
+    U->>U: Start setInterval timer (tick every 1s), display elapsed on card
+
+    Note over U: User works on the task...
+
+    U->>U: Card dragged OUT OF Ongoing (to Pending, Completed, etc.)
+    U->>U: Stop timer, calculate elapsed seconds
+
+    U->>A: PATCH /api/tasks/:id/time { additionalSeconds: 1834 }
+    A->>A: Validate, read current totalTimeSpent
+    A->>D: $inc totalTimeSpent by 1834
+    D-->>A: Updated document
+    A-->>U: 200 { totalTimeSpent: 4521 }
+    U->>U: Display cumulative time on card
+```
+
+### Design decisions
+
+| Decision | Rationale |
+|---|---|
+| **Timer runs in the browser** | Avoids constant server pings. The backend doesn't need to know about every second — only the final elapsed duration matters. |
+| **Persist on column exit** | Time is sent to the server only when the task leaves Ongoing. This minimizes API calls while ensuring no data is lost on intentional moves. |
+| **Use `$inc` (atomic increment)** | If a task moves in and out of Ongoing multiple times, each session's duration is *added* to the running total, never overwritten. |
+| **Periodic auto-save (safety net)** | Every 60 seconds while a task is in Ongoing, the frontend sends a time checkpoint to the backend. This prevents data loss if the browser crashes or the tab is closed unexpectedly. |
+| **Display format** | The UI converts raw seconds into `HH:MM:SS` for readability. |
+
+---
+
+## Summary
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     BROWSER (React)                     │
+│                                                         │
+│  localStorage          Board UI            DnD Engine   │
+│  ┌──────────┐   ┌─────────────────────┐   ┌─────────┐  │
+│  │ userId   │   │ Todo │Pend│Ongo│Done │   │ Drag &  │  │
+│  │ (UUID)   │   │      │    │    │     │   │  Drop   │  │
+│  └──────────┘   └─────────────────────┘   └─────────┘  │
+│                         │  Timer (setInterval)          │
+│                         │                               │
+└─────────────────────────┼───────────────────────────────┘
+                          │ REST (JSON + x-user-id header)
+┌─────────────────────────┼───────────────────────────────┐
+│              EXPRESS SERVER (Node.js)                    │
+│                         │                               │
+│    Validation    Route Handlers    Error Middleware      │
+│                         │                               │
+└─────────────────────────┼───────────────────────────────┘
+                          │ Mongoose ODM
+┌─────────────────────────┼───────────────────────────────┐
+│                    MONGODB                              │
+│                         │                               │
+│              tasks collection                           │
+│    { userId, title, status, position, totalTimeSpent }  │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+This architecture is **intentionally simple** — one collection, no auth overhead, stateless REST calls, and browser-side time tracking. It stays clean while being fully production-capable.
