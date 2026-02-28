@@ -5,8 +5,12 @@
 import axios from "axios";
 import { getAnonymousUserId } from "../utils/userId.js";
 
+// In production (Vercel), hit the Render backend directly.
+// In development (localhost), use the Vite proxy.
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "/api",
+    baseURL: isLocal ? "/api" : "https://daily-task-manager-kanban.onrender.com/api",
     headers: {
         "Content-Type": "application/json",
     },
