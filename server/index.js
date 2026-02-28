@@ -19,8 +19,14 @@ const app = express();
 // ─── Core Middleware ─────────────────────────────────────
 
 // Enable CORS for all origins (no auth, open API)
-app.use(cors());
+// app.use(cors());
+import cors from "cors";
 
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "x-anonymous-user-id"]
+}));
 // Parse incoming JSON request bodies
 app.use(express.json());
 
