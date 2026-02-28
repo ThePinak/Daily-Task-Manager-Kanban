@@ -28,7 +28,7 @@ function App() {
           {/* Title */}
           <div>
             <h1 className="text-lg font-bold text-white tracking-tight">
-              Daily Task Board
+              My Task Board
             </h1>
             <p className="text-xs text-gray-400">
               {new Date().toLocaleDateString("en-US", {
@@ -43,8 +43,8 @@ function App() {
 
         {/* Right side — task count summary */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 bg-surface-700 px-3 py-1.5 rounded-full">
-            ✨ Plan your day
+          <span className="text-xs text-gray-300 bg-surface-700 px-3 py-2 rounded-full">
+            Plan your day
           </span>
         </div>
       </header>
@@ -53,6 +53,11 @@ function App() {
       <main className="flex-1 p-6 overflow-x-auto">
         <Board />
       </main>
+
+      {/* ─── Footer ──────────────────────────────────── */}
+      <footer className="py-3 text-center text-xs text-gray-500">
+        Made with <span className="text-red-400">❤</span> by Pinak
+      </footer>
     </div>
   );
 }

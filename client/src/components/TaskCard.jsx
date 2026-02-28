@@ -5,6 +5,10 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTimer } from "../hooks/useTimer.js";
 
+// Status order for move navigation
+const STATUSES = ["todo", "pending", "ongoing", "completed"];
+const STATUS_LABELS = { todo: "Todo", pending: "Pending", ongoing: "Ongoing", completed: "Done" };
+
 const PRIORITY_CONFIG = {
     high: {
         dot: "bg-priority-high",
@@ -39,7 +43,7 @@ function formatHours(hours) {
     return `${hours}h`;
 }
 
-function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, onDelete }) {
+function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, onDelete, onMoveTask }) {
     const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
     const estimatedDisplay = formatHours(task.estimatedTime);
 
@@ -49,7 +53,7 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
         task.totalTimeSpent || 0
     );
 
-    // Remaining time (estimated in minutes → seconds, minus elapsed)
+    // Remaining time (estimated in hours → seconds, minus elapsed)
     const estimatedSeconds = (task.estimatedTime || 0) * 3600;
     const remaining = Math.max(0, estimatedSeconds - elapsed);
 
@@ -58,6 +62,13 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
         await stop();
         if (onComplete) onComplete(task._id);
     };
+
+    // Move navigation
+    const currentIndex = STATUSES.indexOf(task.status);
+    const canMoveLeft = currentIndex > 0;
+    const canMoveRight = currentIndex < STATUSES.length - 1;
+    const prevStatus = canMoveLeft ? STATUSES[currentIndex - 1] : null;
+    const nextStatus = canMoveRight ? STATUSES[currentIndex + 1] : null;
 
     const {
         attributes,
@@ -240,6 +251,45 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                         </svg>
                         {formatSeconds(task.totalTimeSpent)} spent
                     </span>
+                </div>
+            )}
+
+            {/* ─── Move Buttons (← / →) ──────────────────── */}
+            {!isCompleted && onMoveTask && (
+                <div className="mt-2.5 pt-2 border-t border-surface-700/50 flex items-center justify-center gap-3">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); if (prevStatus) onMoveTask(task._id, prevStatus); }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        disabled={!canMoveLeft}
+                        title={prevStatus ? `Move to ${STATUS_LABELS[prevStatus]}` : ""}
+                        className={`p-1 rounded-md transition-all
+                          ${canMoveLeft
+                                ? "text-gray-400 hover:text-gray-100 hover:bg-surface-600 active:scale-90"
+                                : "text-surface-700 cursor-not-allowed"
+                            }`}
+                    >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <span className="text-[9px] text-gray-600 uppercase tracking-widest">{STATUS_LABELS[task.status]}</span>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); if (nextStatus) onMoveTask(task._id, nextStatus); }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        disabled={!canMoveRight}
+                        title={nextStatus ? `Move to ${STATUS_LABELS[nextStatus]}` : ""}
+                        className={`p-1 rounded-md transition-all
+                          ${canMoveRight
+                                ? "text-gray-400 hover:text-gray-100 hover:bg-surface-600 active:scale-90"
+                                : "text-surface-700 cursor-not-allowed"
+                            }`}
+                    >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
             )}
         </div>

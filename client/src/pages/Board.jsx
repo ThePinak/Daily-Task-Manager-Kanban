@@ -263,6 +263,31 @@ function Board() {
         }
     };
 
+    // ─── Move task to a specific column ──────────────────
+    const handleMoveTask = async (taskId, targetStatus) => {
+        const snapshot = [...tasks];
+
+        // Calculate position at end of target column
+        const targetTasks = tasks.filter((t) => t.status === targetStatus);
+        const newPosition = targetTasks.length;
+
+        // Optimistic update
+        setTasks((prev) =>
+            prev.map((t) =>
+                t._id === taskId
+                    ? { ...t, status: targetStatus, position: newPosition }
+                    : t
+            )
+        );
+
+        try {
+            await moveTaskApi(taskId, targetStatus, newPosition);
+        } catch (err) {
+            console.error("Failed to move task:", err);
+            setTasks(snapshot);
+        }
+    };
+
     // ─── Delete a single task ───────────────────────────
     const handleDeleteTask = async (taskId) => {
         const snapshot = [...tasks];
@@ -329,6 +354,7 @@ function Board() {
                         onAddTask={handleAddTask}
                         onClearCompleted={handleClearCompleted}
                         onDelete={handleDeleteTask}
+                        onMoveTask={handleMoveTask}
                     />
                 ))}
             </div>

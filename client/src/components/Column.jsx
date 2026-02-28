@@ -44,7 +44,7 @@ const COLUMN_CONFIG = {
     },
 };
 
-function Column({ status, tasks = [], onComplete, onAddTask, onClearCompleted, onDelete }) {
+function Column({ status, tasks = [], onComplete, onAddTask, onClearCompleted, onDelete, onMoveTask }) {
     const config = COLUMN_CONFIG[status];
     const isCompleted = status === "completed";
     const isOngoing = status === "ongoing";
@@ -122,6 +122,7 @@ function Column({ status, tasks = [], onComplete, onAddTask, onClearCompleted, o
                                 isOngoing={isOngoing}
                                 onComplete={onComplete}
                                 onDelete={onDelete}
+                                onMoveTask={onMoveTask}
                             />
                         ))
                     ) : (
