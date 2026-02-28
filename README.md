@@ -9,20 +9,6 @@ A personal productivity tool inspired by Kanban methodology — built for **dail
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white)
 
-
----
-
-## 🧐 Problem Statement
-
-People juggle many daily tasks — work assignments, errands, follow-ups, personal goals. The common problems:
-
-- **Forgetting tasks** scattered across sticky notes and mental lists
-- **No visibility** into what's in progress vs. what's blocked
-- **No time awareness** — tasks take longer than expected with no tracking
-- **Complex tools** like Jira/Trello are overkill for daily personal task flow
-
-This app solves all of these with a **zero-authentication, zero-setup** daily board.
-
 ---
 
 ## ✨ Key Features
