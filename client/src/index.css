@@ -11,11 +11,11 @@
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
 
-  /* Surface colors (dark theme) */
-  --color-surface-900: #0f172a;
-  --color-surface-800: #1e293b;
-  --color-surface-700: #334155;
-  --color-surface-600: #475569;
+  /* Surface colors — controlled by data-theme via CSS vars */
+  --color-surface-900: var(--surface-900);
+  --color-surface-800: var(--surface-800);
+  --color-surface-700: var(--surface-700);
+  --color-surface-600: var(--surface-600);
 
   /* Status column colors */
   --color-todo: #f59e0b;
@@ -32,15 +32,87 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Dark Theme (default) ─────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  --surface-900: #0f172a;
+  --surface-800: #1e293b;
+  --surface-700: #334155;
+  --surface-600: #475569;
+}
+
+/* ─── Light Theme ──────────────────────────────────────── */
+
+[data-theme="light"] {
+  --surface-900: #f1f5f9;
+  --surface-800: #ffffff;
+  --surface-700: #e2e8f0;
+  --surface-600: #cbd5e1;
+}
+
 /* ─── Base Styles ──────────────────────────────────────── */
 
 body {
-  @apply bg-surface-900 text-gray-100 font-sans antialiased;
+  @apply bg-surface-900 font-sans antialiased;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] body,
+:root body {
+  @apply text-gray-100;
+}
+
+[data-theme="light"] body {
+  @apply text-gray-800;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* ─── Light mode text overrides ────────────────────────── */
+
+[data-theme="light"] .text-gray-100 {
+  color: #1e293b;
+}
+
+[data-theme="light"] .text-gray-200 {
+  color: #334155;
+}
+
+[data-theme="light"] .text-gray-300 {
+  color: #475569;
+}
+
+[data-theme="light"] .text-gray-400 {
+  color: #64748b;
+}
+
+[data-theme="light"] .text-gray-500 {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .text-gray-600 {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .text-white {
+  color: #0f172a;
+}
+
+[data-theme="light"] .placeholder-gray-500::placeholder {
+  color: #94a3b8;
+}
+
+/* Light mode border overrides */
+[data-theme="light"] .border-surface-700\/50 {
+  border-color: rgb(226 232 240 / 0.7);
+}
+
+[data-theme="light"] .border-surface-600 {
+  border-color: #cbd5e1;
 }
 
 /* ─── Scrollbar ────────────────────────────────────────── */
