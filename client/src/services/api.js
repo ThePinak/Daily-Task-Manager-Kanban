@@ -6,7 +6,7 @@ import axios from "axios";
 import { getAnonymousUserId } from "../utils/userId.js";
 
 const api = axios.create({
-    baseURL: "/api",
+    baseURL: "https://daily-task-manager-kanban.onrender.com",
     headers: {
         "Content-Type": "application/json",
     },
