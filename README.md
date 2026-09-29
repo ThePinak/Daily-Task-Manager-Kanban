@@ -2,7 +2,6 @@
 
 A personal productivity tool inspired by Kanban methodology — built for **daily task flow**, not project management. Plan your day, track your time, and stay focused with a clean drag-and-drop interface.
 
-**Experience Here**: [Click Here](https://daily-task-manager-kanban.vercel.app/)
 
 ![MERN Stack](https://img.shields.io/badge/Stack-MERN-61DAFB?style=flat-square)
 ![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?style=flat-square&logo=node.js&logoColor=white)
