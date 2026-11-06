@@ -10,7 +10,7 @@ import { getAnonymousUserId } from "../utils/userId.js";
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 const api = axios.create({
-    baseURL: isLocal ? "/api" : "https://daily-task-manager-kanban.onrender.com/api",
+    baseURL: isLocal ? "/api" : (import.meta.env.VITE_API_URL || "https://daily-task-manager-kanban.onrender.com/api"),
     headers: {
         "Content-Type": "application/json",
     },

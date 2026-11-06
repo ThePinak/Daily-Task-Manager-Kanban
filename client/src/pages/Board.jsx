@@ -15,6 +15,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 
 import Column from "../components/Column.jsx";
 import TaskCard from "../components/TaskCard.jsx";
+import DailyStats from "../components/DailyStats.jsx";
 import { fetchTodayTasks, moveTask as moveTaskApi, createTask, deleteCompletedTasks, deleteTask } from "../services/taskService.js";
 
 // Priority sort order for the Pending column
@@ -337,37 +338,42 @@ function Board() {
     }
 
     return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-        >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                {STATUSES.map((status) => (
-                    <Column
-                        key={status}
-                        status={status}
-                        tasks={groupedTasks[status]}
-                        onComplete={handleCompleteTask}
-                        onAddTask={handleAddTask}
-                        onClearCompleted={handleClearCompleted}
-                        onDelete={handleDeleteTask}
-                        onMoveTask={handleMoveTask}
-                    />
-                ))}
-            </div>
+        <div className="max-w-7xl mx-auto">
+            {/* Daily Summary & Progress Bar */}
+            <DailyStats tasks={tasks} />
 
-            {/* Drag Overlay — floating card that follows cursor */}
-            <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
-                {activeTask ? (
-                    <div className="opacity-90 rotate-[2deg] scale-105">
-                        <TaskCard task={activeTask} />
-                    </div>
-                ) : null}
-            </DragOverlay>
-        </DndContext>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {STATUSES.map((status) => (
+                        <Column
+                            key={status}
+                            status={status}
+                            tasks={groupedTasks[status]}
+                            onComplete={handleCompleteTask}
+                            onAddTask={handleAddTask}
+                            onClearCompleted={handleClearCompleted}
+                            onDelete={handleDeleteTask}
+                            onMoveTask={handleMoveTask}
+                        />
+                    ))}
+                </div>
+
+                {/* Drag Overlay — floating card that follows cursor */}
+                <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
+                    {activeTask ? (
+                        <div className="opacity-90 rotate-[2deg] scale-105">
+                            <TaskCard task={activeTask} />
+                        </div>
+                    ) : null}
+                </DragOverlay>
+            </DndContext>
+        </div>
     );
 }
 
