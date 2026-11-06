@@ -57,7 +57,7 @@ export default function LandingPage({ onLaunchApp }) {
                 {/* Announcement Pill */}
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs font-medium text-gray-700 mb-6 shadow-2xs">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                    <span>Pure White Apple Aesthetics · Zero Login Required</span>
+                    <span>No Login Required</span>
                 </div>
 
                 {/* Main Headline */}
@@ -363,3 +363,4 @@ export default function LandingPage({ onLaunchApp }) {
         </div>
     );
 }
+
