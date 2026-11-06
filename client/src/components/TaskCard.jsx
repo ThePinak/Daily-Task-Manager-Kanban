@@ -1,34 +1,32 @@
 // ─── TaskCard Component ─────────────────────────────────
-// Apple-inspired frosted glass draggable card with timer & navigation.
+// Apple-style pure white task card. Zero emojis, high contrast, clean typography.
 
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTimer } from "../hooks/useTimer.js";
 
-// Status order for move navigation
 const STATUSES = ["todo", "pending", "ongoing", "completed"];
 const STATUS_LABELS = { todo: "Todo", pending: "Pending", ongoing: "Ongoing", completed: "Done" };
 
 const PRIORITY_CONFIG = {
     high: {
-        dot: "bg-rose-500",
-        badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+        dot: "bg-red-500",
+        badge: "bg-red-50 text-red-700 border border-red-200 font-semibold",
         label: "High",
     },
     medium: {
         dot: "bg-amber-500",
-        badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+        badge: "bg-amber-50 text-amber-800 border border-amber-200 font-semibold",
         label: "Medium",
     },
     low: {
-        dot: "bg-emerald-500",
-        badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+        dot: "bg-green-500",
+        badge: "bg-green-50 text-green-800 border border-green-200 font-semibold",
         label: "Low",
     },
 };
 
-// Format seconds to HH:MM:SS or MM:SS
 function formatSeconds(totalSeconds) {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
@@ -37,7 +35,6 @@ function formatSeconds(totalSeconds) {
     return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
 
-// Format hours for display
 function formatHours(hours) {
     if (!hours) return null;
     if (hours < 1) return `${Math.round(hours * 60)}m`;
@@ -48,23 +45,20 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
     const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
     const estimatedDisplay = formatHours(task.estimatedTime);
 
-    // Timer — only active for Ongoing tasks
+    // Timer — active for Ongoing tasks
     const { elapsed, isRunning, start, pause, stop } = useTimer(
         task._id,
         task.totalTimeSpent || 0
     );
 
-    // Remaining time (estimated in hours → seconds, minus elapsed)
     const estimatedSeconds = (task.estimatedTime || 0) * 3600;
     const remaining = Math.max(0, estimatedSeconds - elapsed);
 
-    // Handle Complete button
     const handleComplete = async () => {
         await stop();
         if (onComplete) onComplete(task._id);
     };
 
-    // Move navigation
     const currentIndex = STATUSES.indexOf(task.status);
     const canMoveLeft = currentIndex > 0;
     const canMoveRight = currentIndex < STATUSES.length - 1;
@@ -96,14 +90,14 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
             {...attributes}
             {...listeners}
             className={`
-        group relative rounded-2xl p-4 transition-all duration-200 select-none
+        group relative rounded-xl p-3.5 transition-all duration-150 select-none
         ${isDragging
-                    ? "opacity-50 shadow-2xl scale-[1.03] z-50 ring-2 ring-brand-500 bg-white dark:bg-slate-800"
+                    ? "opacity-50 shadow-xl scale-[1.02] z-50 ring-2 ring-brand-500 bg-white"
                     : isOngoing && isRunning
-                        ? "bg-white dark:bg-slate-800/90 border border-sky-400/60 shadow-md shadow-sky-500/10 ring-2 ring-sky-400/20"
+                        ? "bg-white border-2 border-sky-500 shadow-sm"
                         : isCompleted
-                            ? "bg-white/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 opacity-75"
-                            : "bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md cursor-grab active:cursor-grabbing"
+                            ? "bg-gray-50/80 border border-gray-200/80 opacity-70"
+                            : "bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xs cursor-grab active:cursor-grabbing"
                 }
       `}
         >
@@ -113,9 +107,9 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                     onClick={(e) => { e.stopPropagation(); onDelete(task._id); }}
                     onPointerDown={(e) => e.stopPropagation()}
                     title="Delete task"
-                    className="absolute top-3.5 right-3.5 p-1 rounded-lg
+                    className="absolute top-3 right-3 p-1 rounded-md
                       opacity-0 group-hover:opacity-100
-                      text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10
+                      text-gray-400 hover:text-red-600 hover:bg-red-50
                       transition-all duration-150"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -124,37 +118,37 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                 </button>
             )}
 
-            {/* Top row: priority + estimated time */}
+            {/* Top row: Priority & estimated time */}
             <div className="flex items-center justify-between mb-2">
                 <span
-                    className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${priority.badge}`}
+                    className={`inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full ${priority.badge}`}
                 >
                     <span className={`w-1.5 h-1.5 rounded-full ${priority.dot}`} />
                     {priority.label}
                 </span>
 
                 {estimatedDisplay && !isOngoing && (
-                    <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                        <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <span className="text-[11px] text-gray-500 flex items-center gap-1 font-medium">
+                        <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {estimatedDisplay}
                     </span>
                 )}
 
-                {/* Running indicator pulse */}
+                {/* Active indicator */}
                 {isOngoing && isRunning && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-sky-600 dark:text-sky-400 font-semibold">
+                    <span className="flex items-center gap-1.5 text-[11px] text-sky-700 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-                        Focusing
+                        Active
                     </span>
                 )}
             </div>
 
             {/* Title */}
             <h3
-                className={`text-xs font-bold leading-snug mb-1 text-slate-800 dark:text-white ${
-                    isCompleted ? "line-through text-slate-400 dark:text-slate-500" : ""
+                className={`text-xs font-semibold leading-snug mb-1 text-gray-950 ${
+                    isCompleted ? "line-through text-gray-400" : ""
                 }`}
             >
                 {task.title}
@@ -162,36 +156,33 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
 
             {/* Description */}
             {task.description && (
-                <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
+                <p className="text-[11px] leading-relaxed text-gray-600 line-clamp-2 mb-2">
                     {task.description}
                 </p>
             )}
 
             {/* ─── Timer Section (Ongoing only) ──────────── */}
             {isOngoing && (
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                <div className="mt-2.5 pt-2.5 border-t border-gray-100">
                     {/* Time display grid */}
-                    <div className="grid grid-cols-3 gap-2 mb-2.5 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl">
-                        {/* Estimated */}
+                    <div className="grid grid-cols-3 gap-1.5 mb-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
                         <div className="text-center">
-                            <p className="text-[9px] text-slate-400 uppercase font-semibold">Est.</p>
-                            <p className="text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">
+                            <p className="text-[9px] text-gray-400 font-semibold uppercase">Est.</p>
+                            <p className="text-[11px] font-mono font-bold text-gray-700">
                                 {estimatedSeconds > 0 ? formatSeconds(estimatedSeconds) : "—"}
                             </p>
                         </div>
 
-                        {/* Spent */}
                         <div className="text-center">
-                            <p className="text-[9px] text-slate-400 uppercase font-semibold">Spent</p>
-                            <p className={`text-[11px] font-mono font-bold ${isRunning ? "text-sky-600 dark:text-sky-400" : "text-slate-700 dark:text-slate-200"}`}>
+                            <p className="text-[9px] text-gray-400 font-semibold uppercase">Spent</p>
+                            <p className={`text-[11px] font-mono font-bold ${isRunning ? "text-sky-600" : "text-gray-900"}`}>
                                 {formatSeconds(elapsed)}
                             </p>
                         </div>
 
-                        {/* Remaining */}
                         <div className="text-center">
-                            <p className="text-[9px] text-slate-400 uppercase font-semibold">Left</p>
-                            <p className={`text-[11px] font-mono font-bold ${remaining === 0 && estimatedSeconds > 0 ? "text-rose-500" : "text-slate-600 dark:text-slate-300"}`}>
+                            <p className="text-[9px] text-gray-400 font-semibold uppercase">Left</p>
+                            <p className={`text-[11px] font-mono font-bold ${remaining === 0 && estimatedSeconds > 0 ? "text-red-600" : "text-gray-700"}`}>
                                 {estimatedSeconds > 0 ? formatSeconds(remaining) : "—"}
                             </p>
                         </div>
@@ -199,55 +190,64 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
 
                     {/* Progress bar */}
                     {estimatedSeconds > 0 && (
-                        <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full mb-3 overflow-hidden">
+                        <div className="w-full h-1.5 bg-gray-100 rounded-full mb-2.5 overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-700 ${
-                                    elapsed >= estimatedSeconds ? "bg-rose-500" : "bg-sky-500"
+                                    elapsed >= estimatedSeconds ? "bg-red-500" : "bg-sky-500"
                                 }`}
                                 style={{ width: `${Math.min(100, (elapsed / estimatedSeconds) * 100)}%` }}
                             />
                         </div>
                     )}
 
-                    {/* Timer controls */}
-                    <div className="flex items-center gap-2">
+                    {/* Timer controls (No emojis) */}
+                    <div className="flex items-center gap-1.5">
                         {!isRunning ? (
                             <button
                                 onClick={(e) => { e.stopPropagation(); start(); }}
                                 onPointerDown={(e) => e.stopPropagation()}
-                                className="flex-1 text-xs font-semibold py-1.5 px-3 rounded-xl
-                                  bg-sky-50 hover:bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 dark:text-sky-400 transition-all active:scale-95"
+                                className="flex-1 text-xs font-semibold py-1.5 px-2.5 rounded-lg
+                                  bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition-all flex items-center justify-center gap-1"
                             >
-                                {elapsed > task.totalTimeSpent ? "▶ Resume" : "▶ Start"}
+                                <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                                {elapsed > task.totalTimeSpent ? "Resume" : "Start"}
                             </button>
                         ) : (
                             <button
                                 onClick={(e) => { e.stopPropagation(); pause(); }}
                                 onPointerDown={(e) => e.stopPropagation()}
-                                className="flex-1 text-xs font-semibold py-1.5 px-3 rounded-xl
-                                  bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 dark:text-amber-400 transition-all active:scale-95"
+                                className="flex-1 text-xs font-semibold py-1.5 px-2.5 rounded-lg
+                                  bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-all flex items-center justify-center gap-1"
                             >
-                                ⏸ Pause
+                                <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                </svg>
+                                Pause
                             </button>
                         )}
 
                         <button
                             onClick={(e) => { e.stopPropagation(); handleComplete(); }}
                             onPointerDown={(e) => e.stopPropagation()}
-                            className="text-xs font-semibold py-1.5 px-3.5 rounded-xl
-                              bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs shadow-emerald-500/20 transition-all active:scale-95"
+                            className="text-xs font-semibold py-1.5 px-3 rounded-lg
+                              bg-green-600 hover:bg-green-700 text-white transition-all flex items-center justify-center gap-1"
                         >
-                            ✓ Done
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Done
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* ─── Time spent (non-Ongoing, non-timer view) ── */}
+            {/* Time spent (non-Ongoing) */}
             {!isOngoing && task.totalTimeSpent > 0 && (
-                <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                        <svg className="w-3 h-3 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                    <span className="text-[11px] text-gray-500 flex items-center gap-1 font-medium">
+                        <svg className="w-3 h-3 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {formatSeconds(task.totalTimeSpent)} tracked
@@ -255,18 +255,18 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                 </div>
             )}
 
-            {/* ─── Move Navigation Buttons ─── */}
+            {/* Move Navigation Buttons */}
             {!isCompleted && onMoveTask && (
-                <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
                     <button
                         onClick={(e) => { e.stopPropagation(); if (prevStatus) onMoveTask(task._id, prevStatus); }}
                         onPointerDown={(e) => e.stopPropagation()}
                         disabled={!canMoveLeft}
                         title={prevStatus ? `Move to ${STATUS_LABELS[prevStatus]}` : ""}
-                        className={`p-1 rounded-lg transition-all ${
+                        className={`p-1 rounded-md transition-all ${
                             canMoveLeft
-                                ? "text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-90"
-                                : "text-slate-200 dark:text-slate-700 cursor-not-allowed"
+                                ? "text-gray-400 hover:text-gray-900 hover:bg-gray-100 active:scale-90"
+                                : "text-gray-200 cursor-not-allowed"
                         }`}
                     >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -274,7 +274,7 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                         </svg>
                     </button>
 
-                    <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">
+                    <span className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">
                         {STATUS_LABELS[task.status]}
                     </span>
 
@@ -283,10 +283,10 @@ function TaskCard({ task, isCompleted = false, isOngoing = false, onComplete, on
                         onPointerDown={(e) => e.stopPropagation()}
                         disabled={!canMoveRight}
                         title={nextStatus ? `Move to ${STATUS_LABELS[nextStatus]}` : ""}
-                        className={`p-1 rounded-lg transition-all ${
+                        className={`p-1 rounded-md transition-all ${
                             canMoveRight
-                                ? "text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-90"
-                                : "text-slate-200 dark:text-slate-700 cursor-not-allowed"
+                                ? "text-gray-400 hover:text-gray-900 hover:bg-gray-100 active:scale-90"
+                                : "text-gray-200 cursor-not-allowed"
                         }`}
                     >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

@@ -2,68 +2,39 @@
 
 @import "tailwindcss";
 
-/* ─── Custom Theme ─────────────────────────────────────── */
+/* ─── Custom Apple-inspired Pure White Theme ───────────────── */
 
 @theme {
-  /* Brand colors — Apple-like system blue */
-  --color-brand-400: #60a5fa;
+  /* Brand colors — Crisp Apple System Blue */
   --color-brand-500: #0071e3;
-  --color-brand-600: #0056b3;
-  --color-brand-700: #003e82;
+  --color-brand-600: #005bb5;
+  --color-brand-700: #00448a;
 
-  /* Surface colors — controlled by data-theme via CSS vars */
-  --color-surface-900: var(--surface-900);
-  --color-surface-800: var(--surface-800);
-  --color-surface-700: var(--surface-700);
-  --color-surface-600: var(--surface-600);
+  /* Status Colors */
+  --color-todo: #d97706;      /* Amber 600 */
+  --color-pending: #7c3aed;   /* Violet 600 */
+  --color-ongoing: #0284c7;   /* Sky 600 */
+  --color-completed: #16a34a; /* Green 600 */
 
-  /* Apple Vibrant Status column colors */
-  --color-todo: #f59e0b;
-  --color-pending: #8b5cf6;
-  --color-ongoing: #0284c7;
-  --color-completed: #10b981;
+  /* Priority Colors */
+  --color-priority-low: #16a34a;
+  --color-priority-medium: #d97706;
+  --color-priority-high: #dc2626;
 
-  /* Priority colors */
-  --color-priority-low: #10b981;
-  --color-priority-medium: #f59e0b;
-  --color-priority-high: #ef4444;
-
-  /* Apple-inspired typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+  /* Apple System Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
 }
 
-/* ─── Light Theme (Default) ────────────────────────────── */
-
-:root,
-[data-theme="light"] {
-  --surface-900: #f8fafc;
-  --surface-800: #ffffff;
-  --surface-700: #e2e8f0;
-  --surface-600: #cbd5e1;
-}
-
-/* ─── Dark Theme ───────────────────────────────────────── */
-
-[data-theme="dark"] {
-  --surface-900: #0b0f19;
-  --surface-800: #131c2e;
-  --surface-700: #202d44;
-  --surface-600: #334460;
-}
-
-/* ─── Base Styles ──────────────────────────────────────── */
+/* ─── Pure White Light Theme (No Dark Mode, No Blue Tint) ──── */
 
 body {
-  @apply bg-surface-900 font-sans antialiased text-slate-800;
-  min-height: 100vh;
-  letter-spacing: -0.011em;
+  background-color: #f9fafb; /* Clean neutral light gray */
+  color: #111827;            /* Deep black-slate for maximum readability */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
-}
-
-[data-theme="dark"] body {
-  @apply text-slate-100;
+  min-height: 100vh;
 }
 
 #root {
@@ -71,84 +42,35 @@ body {
   position: relative;
 }
 
-/* ─── Apple Glassmorphism Helpers ──────────────────────── */
+/* ─── Frosted Glass Utilities (Clean Neutral White) ────────── */
 
-.glass-surface {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-
-[data-theme="dark"] .glass-surface {
-  background: rgba(19, 28, 46, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.92);
+.glass-header {
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+  border-bottom: 1px solid #e5e7eb;
 }
 
-[data-theme="dark"] .glass-card {
-  background: rgba(19, 28, 46, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+.clean-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
 }
 
-/* Light / Dark Mode Text Compatibility */
-[data-theme="light"] .text-white {
-  color: #0f172a;
+.clean-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-theme="light"] .text-gray-100 {
-  color: #1e293b;
+.clean-card-hover:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-[data-theme="light"] .text-gray-200 {
-  color: #334155;
-}
-
-[data-theme="light"] .text-gray-300 {
-  color: #475569;
-}
-
-[data-theme="light"] .text-gray-400 {
-  color: #64748b;
-}
-
-[data-theme="light"] .text-gray-500 {
-  color: #94a3b8;
-}
-
-[data-theme="light"] .bg-surface-800 {
-  background-color: #ffffff;
-}
-
-[data-theme="light"] .bg-surface-700 {
-  background-color: #f1f5f9;
-}
-
-[data-theme="light"] .border-surface-700 {
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .border-surface-600 {
-  border-color: #cbd5e1;
-}
-
-/* ─── Scrollbar ────────────────────────────────────────── */
+/* ─── Minimal Scrollbar ───────────────────────────────────── */
 
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -156,10 +78,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: #d1d5db;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
+  background: #9ca3af;
 }

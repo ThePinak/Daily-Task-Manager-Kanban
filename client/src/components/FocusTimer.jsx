@@ -1,5 +1,5 @@
 // ─── FocusTimer Component ──────────────────────────────
-// Apple-style minimalist focus and pomodoro timer for active tasks.
+// Pure White Apple-style Minimalist Focus Timer. Zero emojis, high contrast.
 
 import React, { useState, useEffect } from "react";
 
@@ -12,9 +12,9 @@ function formatSeconds(sec) {
 export default function FocusTimer({ tasks = [], onCompleteTask }) {
     const focusableTasks = tasks.filter((t) => t.status === "ongoing" || t.status === "pending" || t.status === "todo");
     const [selectedTaskId, setSelectedTaskId] = useState(() => focusableTasks[0]?._id || "");
-    const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 min default pomodoro
+    const [timeLeft, setTimeLeft] = useState(25 * 60);
     const [isRunning, setIsRunning] = useState(false);
-    const [mode, setMode] = useState("pomodoro"); // pomodoro (countdown) or stopwatch (count up)
+    const [mode, setMode] = useState("pomodoro");
 
     const currentTask = tasks.find((t) => t._id === selectedTaskId);
 
@@ -52,30 +52,27 @@ export default function FocusTimer({ tasks = [], onCompleteTask }) {
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            <div className="glass-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
-                {/* Background ambient glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
-
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 sm:p-12 text-center shadow-xs">
                 {/* Task selector */}
                 <div className="mb-6 max-w-sm mx-auto">
-                    <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                        Focusing on
+                    <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Active Task
                     </label>
                     {focusableTasks.length > 0 ? (
                         <select
                             value={selectedTaskId}
                             onChange={(e) => setSelectedTaskId(e.target.value)}
-                            className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-500/30 transition-all cursor-pointer"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-gray-900 outline-none focus:bg-white focus:border-brand-500 transition-all cursor-pointer"
                         >
                             {focusableTasks.map((t) => (
                                 <option key={t._id} value={t._id}>
-                                    {t.status === "ongoing" ? "🔄 " : "📋 "} {t.title} ({t.priority})
+                                    {t.title} ({t.priority})
                                 </option>
                             ))}
                         </select>
                     ) : (
-                        <div className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800/50 py-2 px-3 rounded-xl">
-                            All tasks completed! Add new tasks in the board.
+                        <div className="text-xs text-gray-400 bg-gray-50 py-2 px-3 rounded-lg border border-gray-200">
+                            All tasks completed. Add tasks to start focus.
                         </div>
                     )}
                 </div>
@@ -86,10 +83,10 @@ export default function FocusTimer({ tasks = [], onCompleteTask }) {
                         <button
                             key={mins}
                             onClick={() => setPreset(mins)}
-                            className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                                 mode === "pomodoro" && timeLeft === mins * 60
-                                    ? "bg-brand-500 text-white shadow-sm shadow-brand-500/30"
-                                    : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                    ? "bg-brand-500 text-white shadow-2xs"
+                                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                             }`}
                         >
                             {mins}m
@@ -101,29 +98,29 @@ export default function FocusTimer({ tasks = [], onCompleteTask }) {
                             setMode("stopwatch");
                             setTimeLeft(0);
                         }}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                             mode === "stopwatch"
-                                ? "bg-brand-500 text-white shadow-sm shadow-brand-500/30"
-                                : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                ? "bg-brand-500 text-white shadow-2xs"
+                                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                     >
-                        ⏱ Count Up
+                        Count Up
                     </button>
                 </div>
 
                 {/* Digital Display */}
-                <div className="text-7xl sm:text-8xl font-black tracking-tighter text-slate-900 dark:text-white font-mono my-6 select-none">
+                <div className="text-7xl sm:text-8xl font-bold tracking-tighter text-gray-950 font-mono my-6 select-none">
                     {formatSeconds(timeLeft)}
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-3">
                     <button
                         onClick={() => setIsRunning(!isRunning)}
-                        className={`px-8 py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
+                        className={`px-8 py-3 rounded-xl font-bold text-xs tracking-wide transition-all shadow-xs active:scale-95 flex items-center gap-2 ${
                             isRunning
-                                ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25"
-                                : "bg-brand-500 hover:bg-brand-600 text-white shadow-brand-500/30"
+                                ? "bg-amber-600 hover:bg-amber-700 text-white"
+                                : "bg-brand-500 hover:bg-brand-600 text-white"
                         }`}
                     >
                         {isRunning ? (
@@ -146,22 +143,25 @@ export default function FocusTimer({ tasks = [], onCompleteTask }) {
                     <button
                         onClick={resetTimer}
                         title="Reset timer"
-                        className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition-all active:scale-95"
+                        className="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all active:scale-95"
                     >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </button>
                 </div>
 
-                {/* Complete Task shortcut if task selected */}
+                {/* Complete Task button if task selected */}
                 {currentTask && onCompleteTask && (
-                    <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+                    <div className="mt-8 pt-5 border-t border-gray-100 flex justify-center">
                         <button
                             onClick={() => onCompleteTask(currentTask._id)}
-                            className="text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all font-semibold flex items-center gap-1.5"
+                            className="text-xs text-green-700 hover:bg-green-50 px-3.5 py-1.5 rounded-lg border border-green-200 transition-all font-semibold flex items-center gap-1.5"
                         >
-                            ✓ Mark "{currentTask.title}" as Completed
+                            <svg className="w-3.5 h-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Mark "{currentTask.title}" as Completed
                         </button>
                     </div>
                 )}

@@ -1,5 +1,6 @@
 // ─── Board Page ─────────────────────────────────────────
-// Main Kanban board with Search & Priority Filters, plus Tab routing to Analytics & Focus Timer.
+// Main Kanban board with Search & Priority Filters.
+// Pure white design, high contrast readability, zero emojis.
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -11,7 +12,6 @@ import {
     useSensors,
     closestCorners,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 
 import Column from "../components/Column.jsx";
 import TaskCard from "../components/TaskCard.jsx";
@@ -19,10 +19,7 @@ import DailyAnalytics from "../components/DailyAnalytics.jsx";
 import FocusTimer from "../components/FocusTimer.jsx";
 import { fetchTodayTasks, moveTask as moveTaskApi, createTask, deleteCompletedTasks, deleteTask } from "../services/taskService.js";
 
-// Priority sort order for the Pending column
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-
-// Status columns in display order
 const STATUSES = ["todo", "pending", "ongoing", "completed"];
 
 function Board({ activeTab = "board", setActiveTab }) {
@@ -35,7 +32,7 @@ function Board({ activeTab = "board", setActiveTab }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPriority, setSelectedPriority] = useState("all");
 
-    // ─── Sensors (pointer + touch for mobile) ───────────
+    // Sensors
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: { distance: 5 },
@@ -45,7 +42,7 @@ function Board({ activeTab = "board", setActiveTab }) {
         })
     );
 
-    // ─── Fetch tasks on mount ───────────────────────────
+    // Fetch tasks on mount
     useEffect(() => {
         loadTasks();
     }, []);
@@ -64,7 +61,7 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Filtered Tasks ─────────────────────────────────
+    // Filtered Tasks
     const filteredTasks = tasks.filter((t) => {
         const matchesSearch =
             !searchQuery.trim() ||
@@ -75,7 +72,7 @@ function Board({ activeTab = "board", setActiveTab }) {
         return matchesSearch && matchesPriority;
     });
 
-    // ─── Group tasks by status ─────────────────────────
+    // Group tasks by status
     const getGroupedTasks = useCallback(() => {
         const grouped = {};
         for (const status of STATUSES) {
@@ -98,20 +95,17 @@ function Board({ activeTab = "board", setActiveTab }) {
 
     const groupedTasks = getGroupedTasks();
 
-    // ─── Find which column a task belongs to ────────────
     const findTaskColumn = (taskId) => {
         const task = tasks.find((t) => t._id === taskId);
         return task ? task.status : null;
     };
 
-    // ─── Drag Start ──────────────────────────────────────
     const handleDragStart = (event) => {
         const { active } = event;
         const task = tasks.find((t) => t._id === active.id);
         if (task) setActiveTask(task);
     };
 
-    // ─── Drag Over (live preview while dragging) ────────
     const handleDragOver = (event) => {
         const { active, over } = event;
         if (!over) return;
@@ -140,7 +134,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         });
     };
 
-    // ─── Drag End (finalize + persist to backend) ───────
     const handleDragEnd = async (event) => {
         const { active, over } = event;
         setActiveTask(null);
@@ -203,7 +196,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Manual Move Handler (← / → buttons) ────────────
     const handleMoveTask = async (taskId, newStatus) => {
         const task = tasks.find((t) => t._id === taskId);
         if (!task || task.status === newStatus) return;
@@ -228,7 +220,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Complete Task ──────────────────────────────────
     const handleCompleteTask = async (taskId) => {
         const snapshot = [...tasks];
         const completedTasks = tasks.filter((t) => t.status === "completed");
@@ -250,7 +241,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Add Task ───────────────────────────────────────
     const handleAddTask = async (taskData) => {
         const todoTasks = tasks.filter((t) => t.status === "todo");
         const position = todoTasks.length;
@@ -278,7 +268,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Clear Completed Tasks ──────────────────────────
     const handleClearCompleted = async () => {
         const snapshot = [...tasks];
         setTasks((prev) => prev.filter((t) => t.status !== "completed"));
@@ -291,7 +280,6 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Delete Task ────────────────────────────────────
     const handleDeleteTask = async (taskId) => {
         const snapshot = [...tasks];
         setTasks((prev) => prev.filter((t) => t._id !== taskId));
@@ -304,31 +292,28 @@ function Board({ activeTab = "board", setActiveTab }) {
         }
     };
 
-    // ─── Loading state ──────────────────────────────────
     if (loading) {
         return (
             <div className="flex-1 flex items-center justify-center py-24">
                 <div className="text-center">
-                    <div className="w-10 h-10 border-3 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-xs font-semibold text-slate-500">Loading your board...</p>
+                    <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-xs font-semibold text-gray-500">Loading your board...</p>
                 </div>
             </div>
         );
     }
 
-    // ─── Error state ────────────────────────────────────
     if (error) {
         return (
             <div className="flex-1 flex items-center justify-center py-20">
-                <div className="text-center glass-card rounded-3xl p-8 max-w-md">
-                    <div className="text-3xl mb-3">⚠️</div>
-                    <p className="text-sm text-rose-500 font-bold mb-2">
+                <div className="text-center bg-white border border-gray-200 rounded-2xl p-8 max-w-md shadow-xs">
+                    <p className="text-sm text-red-600 font-bold mb-2">
                         Connection Error
                     </p>
-                    <p className="text-xs text-slate-500 mb-4">{error}</p>
+                    <p className="text-xs text-gray-500 mb-4">{error}</p>
                     <button
                         onClick={loadTasks}
-                        className="text-xs bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-xl transition-all shadow-sm shadow-brand-500/20"
+                        className="text-xs bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-lg transition-all"
                     >
                         Try Again
                     </button>
@@ -337,7 +322,7 @@ function Board({ activeTab = "board", setActiveTab }) {
         );
     }
 
-    // ─── Render based on Active Tab ─────────────────────
+    // Render based on Active Tab
     if (activeTab === "analytics") {
         return (
             <DailyAnalytics
@@ -357,15 +342,15 @@ function Board({ activeTab = "board", setActiveTab }) {
         );
     }
 
-    // ─── Default: Kanban Board Tab ──────────────────────
+    // Default: Kanban Board Tab
     return (
-        <div className="max-w-7xl mx-auto space-y-5">
-            {/* ─── Search & Priority Filter Toolbar ─── */}
-            <div className="glass-card rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                {/* Search input */}
-                <div className="relative flex-1 max-w-md">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="max-w-7xl mx-auto space-y-4">
+            {/* Search & Priority Filter Toolbar */}
+            <div className="bg-white border border-gray-200 rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+                {/* Search Input */}
+                <div className="relative flex-1 max-w-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
@@ -374,50 +359,50 @@ function Board({ activeTab = "board", setActiveTab }) {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search tasks..."
-                        className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                        className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:border-brand-500 transition-all"
                     />
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery("")}
-                            className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                            className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-gray-400 hover:text-gray-700"
                         >
                             ✕
                         </button>
                     )}
                 </div>
 
-                {/* Priority filter pills */}
+                {/* Priority filter pills (No emojis) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-1 hidden sm:inline">
                         Priority:
                     </span>
                     {[
                         { key: "all", label: "All", dot: null },
-                        { key: "high", label: "High", dot: "bg-rose-500" },
-                        { key: "medium", label: "Med", dot: "bg-amber-500" },
-                        { key: "low", label: "Low", dot: "bg-emerald-500" },
+                        { key: "high", label: "High", dot: "bg-red-500" },
+                        { key: "medium", label: "Medium", dot: "bg-amber-500" },
+                        { key: "low", label: "Low", dot: "bg-green-500" },
                     ].map((p) => (
                         <button
                             key={p.key}
                             onClick={() => setSelectedPriority(p.key)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 ${
                                 selectedPriority === p.key
-                                    ? "bg-brand-500 text-white shadow-xs shadow-brand-500/25"
-                                    : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                    ? "bg-brand-500 text-white shadow-2xs"
+                                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                             }`}
                         >
-                            {p.dot && <span className={`w-2 h-2 rounded-full ${p.dot}`} />}
+                            {p.dot && <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />}
                             {p.label}
                         </button>
                     ))}
 
-                    <span className="text-xs text-slate-400 font-medium ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+                    <span className="text-xs text-gray-400 font-medium ml-2 pl-2 border-l border-gray-200">
                         {filteredTasks.length} {filteredTasks.length === 1 ? "task" : "tasks"}
                     </span>
                 </div>
             </div>
 
-            {/* ─── Kanban Board Drag & Drop Grid ─── */}
+            {/* Kanban Board Drag & Drop Grid */}
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -425,7 +410,7 @@ function Board({ activeTab = "board", setActiveTab }) {
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {STATUSES.map((status) => (
                         <Column
                             key={status}
@@ -440,10 +425,9 @@ function Board({ activeTab = "board", setActiveTab }) {
                     ))}
                 </div>
 
-                {/* Drag Overlay — floating card that follows cursor */}
                 <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
                     {activeTask ? (
-                        <div className="opacity-95 rotate-[2deg] scale-105 shadow-2xl">
+                        <div className="opacity-95 rotate-[1.5deg] scale-102 shadow-xl bg-white rounded-xl">
                             <TaskCard task={activeTask} />
                         </div>
                     ) : null}
