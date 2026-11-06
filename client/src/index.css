@@ -5,11 +5,11 @@
 /* ─── Custom Theme ─────────────────────────────────────── */
 
 @theme {
-  /* Brand colors */
+  /* Brand colors — Apple-like system blue */
   --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
+  --color-brand-500: #0071e3;
+  --color-brand-600: #0056b3;
+  --color-brand-700: #003e82;
 
   /* Surface colors — controlled by data-theme via CSS vars */
   --color-surface-900: var(--surface-900);
@@ -17,62 +17,96 @@
   --color-surface-700: var(--surface-700);
   --color-surface-600: var(--surface-600);
 
-  /* Status column colors */
+  /* Apple Vibrant Status column colors */
   --color-todo: #f59e0b;
-  --color-pending: #a78bfa;
-  --color-ongoing: #38bdf8;
-  --color-completed: #34d399;
+  --color-pending: #8b5cf6;
+  --color-ongoing: #0284c7;
+  --color-completed: #10b981;
 
   /* Priority colors */
-  --color-priority-low: #34d399;
-  --color-priority-medium: #fbbf24;
-  --color-priority-high: #fb7185;
+  --color-priority-low: #10b981;
+  --color-priority-medium: #f59e0b;
+  --color-priority-high: #ef4444;
 
-  /* Fonts */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Apple-inspired typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
 }
 
-/* ─── Dark Theme (default) ─────────────────────────────── */
+/* ─── Light Theme (Default) ────────────────────────────── */
 
 :root,
-[data-theme="dark"] {
-  --surface-900: #0f172a;
-  --surface-800: #1e293b;
-  --surface-700: #334155;
-  --surface-600: #475569;
-}
-
-/* ─── Light Theme ──────────────────────────────────────── */
-
 [data-theme="light"] {
-  --surface-900: #f1f5f9;
+  --surface-900: #f8fafc;
   --surface-800: #ffffff;
   --surface-700: #e2e8f0;
   --surface-600: #cbd5e1;
 }
 
+/* ─── Dark Theme ───────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --surface-900: #0b0f19;
+  --surface-800: #131c2e;
+  --surface-700: #202d44;
+  --surface-600: #334460;
+}
+
 /* ─── Base Styles ──────────────────────────────────────── */
 
 body {
-  @apply bg-surface-900 font-sans antialiased;
+  @apply bg-surface-900 font-sans antialiased text-slate-800;
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
 }
 
-[data-theme="dark"] body,
-:root body {
-  @apply text-gray-100;
-}
-
-[data-theme="light"] body {
-  @apply text-gray-800;
+[data-theme="dark"] body {
+  @apply text-slate-100;
 }
 
 #root {
   min-height: 100vh;
+  position: relative;
 }
 
-/* ─── Light mode text overrides ────────────────────────── */
+/* ─── Apple Glassmorphism Helpers ──────────────────────── */
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .glass-surface {
+  background: rgba(19, 28, 46, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(19, 28, 46, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+}
+
+/* Light / Dark Mode Text Compatibility */
+[data-theme="light"] .text-white {
+  color: #0f172a;
+}
 
 [data-theme="light"] .text-gray-100 {
   color: #1e293b;
@@ -94,21 +128,16 @@ body {
   color: #94a3b8;
 }
 
-[data-theme="light"] .text-gray-600 {
-  color: #94a3b8;
+[data-theme="light"] .bg-surface-800 {
+  background-color: #ffffff;
 }
 
-[data-theme="light"] .text-white {
-  color: #0f172a;
+[data-theme="light"] .bg-surface-700 {
+  background-color: #f1f5f9;
 }
 
-[data-theme="light"] .placeholder-gray-500::placeholder {
-  color: #94a3b8;
-}
-
-/* Light mode border overrides */
-[data-theme="light"] .border-surface-700\/50 {
-  border-color: rgb(226 232 240 / 0.7);
+[data-theme="light"] .border-surface-700 {
+  border-color: #e2e8f0;
 }
 
 [data-theme="light"] .border-surface-600 {
@@ -118,17 +147,19 @@ body {
 /* ─── Scrollbar ────────────────────────────────────────── */
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-surface-900;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-surface-600 rounded-full;
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #64748b;
+  background: rgba(148, 163, 184, 0.7);
 }
